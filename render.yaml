@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: project-x-ai-rewriter
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: project-x-ai
+    buildCommand: node --check server.mjs
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: 24.15.0
+      - key: PROJECT_X_PROVIDER
+        value: qwen
+      - key: DASHSCOPE_MODEL
+        value: qwen3.8-max
+      - key: DASHSCOPE_API_KEY
+        sync: false
+      - key: PROJECT_X_ACCESS_TOKEN
+        sync: false

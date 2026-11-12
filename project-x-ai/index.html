@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROJECT X · HRBP 文案转换器</title>
+<style>
+:root{--ink:#192a3e;--muted:#505d69;--paper:#fffaf0;--gold:#e4bc69;--line:#cfc4ac;--blue:#e6edf2}
+[hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:#efe9da;color:var(--ink);font:16px/1.6 "Microsoft YaHei","PingFang SC",sans-serif}
+header{background:#17273d;color:#fff9e9;padding:36px max(20px,calc((100vw - 1180px)/2));border-bottom:5px solid var(--gold)}
+header small{letter-spacing:.18em;color:var(--gold);font:700 13px/1.5 "Courier New",monospace}h1{margin:6px 0;font-size:clamp(25px,4vw,38px)}header p{margin:0;color:#e3e9ed}
+main{width:min(1180px,100% - 32px);margin:24px auto 48px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;align-items:start}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:clamp(14px,3vw,24px)}h2{margin:0 0 5px;font-size:21px}p{margin:0 0 12px}.hint{color:var(--muted);font-size:.88rem}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:block;font-weight:700;margin-top:12px}label small{color:var(--muted);font-weight:400}input,textarea,button{font:inherit}input,textarea{display:block;width:100%;margin-top:4px;border:1px solid #9e9b91;border-radius:6px;background:#fffdf8;color:var(--ink);padding:8px 10px}textarea{resize:vertical;min-height:62px}
+:focus-visible{outline:3px solid #9a6313;outline-offset:2px}.actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+button,.link{display:inline-block;border:1px solid #68788a;border-radius:6px;padding:7px 11px;background:#fffdf8;color:var(--ink);cursor:pointer;text-decoration:none}button.primary{background:#203650;color:#fff;border-color:#203650}button:hover,.link:hover{border-color:#8b570a;text-decoration:underline}.head{display:flex;align-items:start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+#output{display:grid;gap:10px;margin-top:12px}details{border:1px solid var(--line);border-radius:7px;background:#fffdf8}details:nth-child(even){background:var(--blue)}summary{cursor:pointer;padding:10px 12px;font-weight:700}summary span{color:var(--muted);font:700 .82rem "Courier New",monospace;margin-right:8px}.card{padding:0 12px 12px}.slot{border-top:1px solid #b6b5ab;padding:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}.slot b{display:block;font-size:.83rem;color:var(--muted)}.card button{font-size:.87rem}.notice{color:#674a18;min-height:1.4em;margin-top:8px}#clipboard{min-height:120px}
+@media(max-width:780px){main{grid-template-columns:1fr}.panel{padding:16px}}
+@media(max-width:420px){.row{grid-template-columns:1fr}main{width:calc(100% - 20px)}}
+</style>
+</head>
+<body>
+<header>
+  <small>PROJECT X / HRBP <span id="mode-label">· AI 生成版</span></small>
+  <h1>档案文案转换器</h1>
+  <p>写下你观察到的事，生成可逐页放进 PROJECT X 的文案。</p>
+</header>
+<main>
+  <section class="panel" aria-labelledby="input-title">
+    <div class="head"><h2 id="input-title">填写观察</h2><button id="example" type="button">载入虚拟示例</button></div>
+    <p class="hint">每条观察写清「做了什么、带来什么结果」，一条一行。具体的动作越多，生成的任务回放越有画面。</p>
+    <form id="form">
+      <div class="row">
+        <label>员工称呼<input name="name" required maxlength="50" placeholder="例如：Julie"></label>
+        <label>特工代号 <small>可选</small><input name="code" maxlength="40" placeholder="例如：破局者"></label>
+      </div>
+      <div class="row">
+        <label>部门 <small>可选</small><input name="team" maxlength="80"></label>
+        <label>职位 <small>可选</small><input name="role" maxlength="80"></label>
+      </div>
+      <label>关键项目或工作场景<textarea name="scene" required maxlength="500" placeholder="例如：业务平台升级，涉及业务、技术和运营团队"></textarea></label>
+      <label>具体行为及成果<textarea name="evidence" required maxlength="2400" placeholder="例如：把业务和技术两边的待确认事项列在同一张表上，标明哪些可以先验证"></textarea></label>
+      <label>已验证的代表性能力<textarea name="skills" required maxlength="500" placeholder="例如：目标管理、跨部门协作"></textarea></label>
+      <label>潜能观察 <small>可选</small><textarea name="potential" maxlength="500" placeholder="例如：在复杂项目中主动牵引行动的潜力"></textarea></label>
+      <label>下一阶段的具体期待<textarea name="expectation" required maxlength="600" placeholder="例如：遇到卡点时先提出自己的判断和备选方案"></textarea></label>
+      <label>行动建议及可提供的支持 <small>可选，一项一行</small><textarea name="actions" maxlength="1400" placeholder="例如：参与一次跨部门项目的关键节点梳理"></textarea></label>
+      <label>想对员工说的一句话 <small>可选</small><textarea name="note" maxlength="600" placeholder="例如：希望你把每一次主动判断，都当成一次小小的进阶"></textarea></label>
+      <p class="hint">点生成后，填写内容会发送给 OpenAI 改写。请先用虚拟示例试用。</p><div class="actions"><button class="primary" type="submit">生成 PROJECT X 文案</button><button type="reset">清空</button></div>
+    </form>
+  </section>
+  <section class="panel" aria-labelledby="output-title">
+    <div class="head"><h2 id="output-title" tabindex="-1">对应书页文案</h2><a class="link" href="https://camlliemao0101-boop.github.io/project-x/editor/?v=inline-e1af68e" target="_blank" rel="noopener">打开 PROJECT X 编辑器 ↗</a></div>
+    <p class="hint">生成后可逐项核对，再复制到编辑器里的同名位置。</p>
+    <div class="actions"><button id="copyAll" type="button" hidden>复制全部文案</button><button id="send-editor" class="primary" type="button" hidden>带入编辑器并核对</button></div>
+    <p id="form-status" role="status" class="hint"></p>
+    <div id="output"><p class="hint">可先载入虚拟示例，看看输入会落到哪一页。</p></div>
+    <p class="notice" id="notice" role="status"></p>
+    <textarea id="clipboard" readonly hidden aria-label="待复制文案"></textarea>
+  </section>
+</main>
+<script>
+const form = document.querySelector('#form');
+const output = document.querySelector('#output');
+const notice = document.querySelector('#notice');
+const clipboard = document.querySelector('#clipboard');
+const copyAll = document.querySelector('#copyAll');
+const sendEditor = document.querySelector('#send-editor');
+let current = [];
+
+function pageText(page) {
+  return page.title + '\n' + page.slots.map(([label,text]) => label + '\n' + text).join('\n\n');
+}
+async function copy(text, success = '已复制，可以粘贴到对应书页。') {
+  clipboard.hidden = true;
+  try {
+    await navigator.clipboard.writeText(text);
+    notice.textContent = success;
+  } catch {
+    clipboard.value = text;
+    clipboard.hidden = false;
+    clipboard.focus();
+    clipboard.select();
+    notice.textContent = '文字已选中，请使用设备的复制操作。';
+  }
+}
+function render(pages) {
+  current = pages;
+  output.replaceChildren();
+  pages.forEach((page,index) => {
+    const detail = document.createElement('details');
+    detail.open = index === 0;
+    const summary = document.createElement('summary');
+    const number = document.createElement('span');
+    number.textContent = String(index + 1).padStart(2,'0');
+    summary.append(number,page.title);
+    const card = document.createElement('div');
+    card.className = 'card';
+    const isCopyable = page.title !== '最后一条密讯';
+    page.slots.forEach(([label,text]) => {
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      const caption = document.createElement('b');
+      caption.textContent = label;
+      slot.append(caption,text);
+      if (isCopyable) {
+        const line = document.createElement('div');
+        line.className = 'actions';
+        const button = document.createElement('button');
+        button.textContent = '复制此项';
+        button.addEventListener('click', () => copy(text));
+        line.append(button);
+        slot.append(line);
+      }
+      card.append(slot);
+    });
+    if (isCopyable) {
+      const button = document.createElement('button');
+      button.textContent = '复制整页';
+      button.addEventListener('click', () => copy(pageText(page)));
+      card.append(button);
+    }
+    detail.append(summary,card);
+    output.append(detail);
+  });
+  copyAll.hidden = false;
+  sendEditor.hidden = false;
+}
+const status = document.querySelector('#form-status');
+const submit = form.querySelector('[type=submit]');
+const isLocalFile = location.protocol === 'file:';
+const localFileMessage = '这是本地预览。模型生成需要从已部署的 HRBP 专用链接打开。';
+if (isLocalFile) {
+  document.querySelector('#mode-label').textContent = '· 表单预览';
+  status.textContent = localFileMessage;
+  submit.textContent = '查看生成说明';
+  submit.type = 'button';
+  submit.addEventListener('click', () => {
+    status.textContent = localFileMessage;
+    status.tabIndex = -1;
+    status.focus();
+  });
+}
+
+const fragment = new URLSearchParams(location.hash.slice(1));
+if (fragment.has('access')) {
+  sessionStorage.setItem('project-x-access', fragment.get('access'));
+  history.replaceState(null, '', location.pathname + location.search);
+}
+function showOutputStatus(message, reveal = false) {
+  status.textContent = message;
+  if (reveal) document.querySelector('#output-title').scrollIntoView({block:'start'});
+}
+form.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (isLocalFile || submit.disabled) return;
+  const access = sessionStorage.getItem('project-x-access');
+  if (!access) {
+    showOutputStatus('当前标签页缺少访问凭证。请把 PowerShell 显示的完整生成版链接复制到此浏览器打开。', true);
+    return;
+  }
+  submit.disabled = true;
+  submit.textContent = '正在改写…';
+  showOutputStatus('正在请模型撰写文案，通常需要几秒到一分钟。请保持页面打开。', true);
+  output.textContent = '';
+  copyAll.hidden = true;
+  sendEditor.hidden = true;
+  notice.textContent = '';
+  const reset = form.querySelector('[type=reset]');
+  reset.disabled = true;
+  document.querySelector('#example').disabled = true;
+  try {
+    const response = await fetch('/api/rewrite', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'X-Project-X-Access':access},
+      body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      signal: AbortSignal.timeout(90000)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    clipboard.hidden = true;
+    render(data.pages);
+    status.textContent = '文案已生成。';
+    notice.textContent = data.followUp ? '待补充：' + data.followUp : '请核对事实后再复制到编辑器。';
+    document.querySelector('#output-title').scrollIntoView({block:'start'});
+    document.querySelector('#output-title').focus({preventScroll:true});
+  } catch (error) {
+    showOutputStatus(error.name === 'TimeoutError' ? '这次生成超时，请重试。' : error.message || '生成失败，请重试。', true);
+  } finally {
+    submit.disabled = false;
+    submit.textContent = '生成 PROJECT X 文案';
+    reset.disabled = false;
+    document.querySelector('#example').disabled = false;
+  }
+});
+form.addEventListener('reset', () => {
+  current = [];
+  output.textContent = '可先载入虚拟示例，看看输入会落到哪一页。';
+  copyAll.hidden = true;
+  sendEditor.hidden = true;
+  clipboard.hidden = true;
+  notice.textContent = '';
+});
+sendEditor.addEventListener('click', () => {
+  if (!current.length) return;
+  try {
+    sessionStorage.setItem('project-x-generated-pages', JSON.stringify(current));
+    location.assign('/editor');
+  } catch {
+    notice.textContent = '无法把内容带入编辑器。请允许此网站保存会话数据，或使用复制功能。';
+  }
+});
+copyAll.addEventListener('click', () => copy(current.filter(page => page.title !== '最后一条密讯').map(pageText).join('\n\n')));
+document.querySelector('#example').addEventListener('click', () => {
+  const sample = {
+    name:'Julie', code:'破局者', team:'虚拟 IT 部门', role:'项目管理',
+    scene:'业务平台升级，涉及业务、技术和运营团队',
+    evidence:'你把业务和技术两边的待确认事项放在同一张清单上，标出哪些要等接口、哪些可以先验证。\n你跟进联调的关键节点，让两边知道下一步各自能做什么。',
+    skills:'目标管理、跨部门协作',
+    potential:'在信息不齐的情况下，带动不同团队围绕同一个卡点形成下一步',
+    expectation:'遇到跨团队卡点时，先形成自己的判断，提出两种可行走法，再推动相关方一起确认。',
+    actions:'找一个正在参与的跨部门项目，和协作方一起梳理交接节点。',
+    note:'希望你在每一次推进任务时，也给自己的判断多留一点空间。'
+  };
+  for (const [key,value] of Object.entries(sample)) form.elements.namedItem(key).value = value;
+  status.textContent = isLocalFile ? '虚拟示例已载入。' + localFileMessage : '虚拟示例已载入，点生成查看结果。';
+});
+</script>
+</body>
+</html>
